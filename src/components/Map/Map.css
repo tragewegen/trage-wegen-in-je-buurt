@@ -1,0 +1,28 @@
+.ol-zoom {
+  top: 25px;
+  left: auto;
+  right: 7px;
+}
+
+.ol-compass {
+  right: auto;
+  left: 4px;
+}
+
+
+.popupContent {
+  overflow-y: scroll;
+  max-height: 80px;
+  background-color: #088;
+}
+
+#olmap{
+  width:100%; 
+  height:100vh;
+  cursor: crosshair;
+}
+
+#olmap:active {
+  cursor: grab;
+}
+

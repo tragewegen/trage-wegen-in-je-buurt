@@ -1,0 +1,52 @@
+.active {
+  background-color: rgb(131, 60, 108);
+}
+
+.vectorChk {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 2px;
+  padding-left: 0px;
+  color: white !important;
+}
+
+.marker {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #088;
+  border-radius: 10px;
+  background-color: #0FF;
+  opacity: 0.5;
+}
+
+.tool, .toggle {
+  padding: 2px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.tool:hover, .tool:active {
+  background-color: rgb(131, 60, 108);
+  padding: 1px;
+  border-radius: 25%;
+}
+
+.toggle:hover, .toggle:active {
+  background-color: rgb(131, 60, 108);
+  padding: 1px;
+  border-radius: 25%;
+}
+
+.activeTool {
+  background-color: rgb(192, 63, 151);
+  padding: 1px;
+  border-radius: 25%;
+}
+
+#toolbar {
+  color: aliceblue;
+}
+
+.ant-popover-title {
+  color: white;
+}
