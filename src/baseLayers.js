@@ -5,15 +5,12 @@ import OSM from 'ol/source/OSM';
 import WMTS from 'ol/source/WMTS';
 import WMS from 'ol/source/TileWMS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-import TileGrid from 'ol/tilegrid/TileGrid';
 import {get as getProjection} from 'ol/proj';
 import {getTopLeft, getWidth} from 'ol/extent';
-import {transformExtent} from 'ol/proj';
 
 //WMTS config: OSM-like tiling:
 /// https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames and https://wiki.openstreetmap.org/wiki/Zoom_levels 
 const webMercator = getProjection('EPSG:3857');
-const wgs = getProjection('EPSG:4326');
 const webmercatorExtent = webMercator.getExtent();
 const size = getWidth(webmercatorExtent) / 256;
 const resolutions = new Array(21);

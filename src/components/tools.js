@@ -1,6 +1,6 @@
 import {Vector as VectorLayer} from 'ol/layer';
 
-import {fromLonLat} from 'ol/proj';
+import {fromLonLat, transformExtent, transform, get as getProj} from 'ol/proj';
 import {register} from 'ol/proj/proj4';
 import proj4 from 'proj4';
 
@@ -8,6 +8,30 @@ proj4.defs("EPSG:31370","+proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 "+
     "+lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl "+
     "+towgs84=-106.869,52.2978,-103.724,0.3366,-0.457,1.8422,-1.2747 +units=m +no_defs");
 register(proj4);
+const wgs = getProj('EPSG:4326');
+const lb72 = getProj('EPSG:31370');
+
+const transformExtent_tolb72 = (extent, proj) => transformExtent(extent, proj, lb72);
+const transformExtent_fromlb72 = (extent, proj) => transformExtent(extent, lb72, proj);
+const latlon_tolb72 = xy => transform(xy , wgs, lb72);
+const latlon_fromlb72 = xy => transform(xy, lb72, wgs);
+const tolb72 = (xy, proj) => transform(xy , proj, lb72);
+const fromlb72 = (xy, proj)  => transform(xy, lb72, proj);
+
+const date_toTimeString = timeString => {
+    let re = /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d)|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d)/
+    if (re.test(timeString) || typeof timeString === 'number' ){
+        return (new Date( Date.parse(timeString))).toLocaleDateString(
+            'nl-be', { weekday:"long", year:"numeric", month:"long", day:"numeric"})
+    }
+    else if(timeString instanceof Date){
+        return timeString.toLocaleDateString(
+            'nl-be', { weekday:"long", year:"numeric", month:"long", day:"numeric"})
+    }
+    else {
+        return timeString
+    }
+}
 
 
 const polygonArea = geom =>  {
@@ -39,7 +63,7 @@ const urlParams = () => {
     const params = (new URL(document.location)).searchParams;
     const trues = ["true", "1", "yes", ''];
     const logo = params.get("logo") ? trues.includes( params.get("logo").toLowerCase() ) : true;
-    const lyrs = params.get("lyrs") ? params.get("lyrs").split(',') : [];
+    const lyrs = params.get("lyrs") ? params.get("lyrs").split(',') : ['trw'];
     const base =  params.get("base") ? params.get("base") : 'osm';
     let x = parseFloat( params.get("x"));
     let y = parseFloat( params.get("y"));
@@ -101,4 +125,5 @@ const VectorLegendSVG = (styleCache, viewBoxWidth) => {
     );
   };
 
-export {addVectorLayer, urlParams, VectorLegendSVG, polygonArea, lineLength};
+export {addVectorLayer, urlParams, VectorLegendSVG, latlon_tolb72, latlon_fromlb72, tolb72, fromlb72, 
+    polygonArea, lineLength, date_toTimeString, transformExtent_tolb72, transformExtent_fromlb72};

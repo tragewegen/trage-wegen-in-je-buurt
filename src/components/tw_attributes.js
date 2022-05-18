@@ -1,3 +1,4 @@
+import {date_toTimeString} from './tools';
 
 export function TW_JUR_STATUUT(feat) {
     switch (parseInt(feat.TW_JUR_STATUUT)) {
@@ -14,8 +15,7 @@ export function TW_JUR_STATUUT(feat) {
 }
   
 export function TW_DAT_INVENTARISATIE(feat) {
-    return (new Date(Date.parse(feat.TW_DAT_INVENTARISATIE))).toLocaleDateString(
-        'nl-be', { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    return date_toTimeString(feat.TW_DAT_INVENTARISATIE);
 }
   
 export function TW_TOEGANKELIJK(feat) {

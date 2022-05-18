@@ -7,6 +7,7 @@ import {Stroke, Icon, Fill, Style} from 'ol/style';
 import greenRoad from './images/greenRoad_lim.svg'
 import {TW_BREEDTE, TW_DAT_INVENTARISATIE, TW_JUR_STATUUT,  TW_NIET_TG_REDEN, 
   TW_NIET_ZB_REDEN, TW_TOEGANKELIJK, TW_VERHARDING, TW_ZICHTBAAR} from './components/tw_attributes';
+import {transformExtent_tolb72} from './components/tools';
 
 //#region TRAGE_WEGEN
 //Trage wegen
@@ -135,22 +136,38 @@ const tragewegen_cache = [
 }
 ]
 
-
-
 //#endregion
 
 //#region OOSTVLAANDEREN
 // Wijzigingen Oost-Vlaanderen 
 ///info: https://geodiensten.oost-vlaanderen.be/arcgis/services/MOB/OVL_buurtwegen_en_wijzigingen/MapServer/WFSServer?service=wfs&request=GetCapabilities&version=1.1.0
 const tw_wijz_OVL_wfs = new VectorSource({
-  format: new GML3(), // GML because ESRI does noet support GeoJSON
-  url: function (extent) {
+  format: new GML3({}), // GML because ESRI does noet support GeoJSON
+  loader: (extent, _, projection, success, failure) => {
     let typeName = 'OVL_buurtwegen_en_wijzigingen:wijzigingen';
     let outputFormat = "GML3";
+    let lb72extent = transformExtent_tolb72(extent, projection);
     let uri = "https://geodiensten.oost-vlaanderen.be/arcgis/services/MOB/OVL_buurtwegen_en_wijzigingen/MapServer/WFSServer?" + 
-    `service=wfs&version=2.0.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsname=EPSG:3857&`+
-    `bbox=${extent.join(',')},EPSG:3857`;
-    return uri;
+    `service=wfs&version=2.0.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsname=EPSG:31370&`+
+    `bbox=${lb72extent.join(',')},EPSG:31370`;
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', uri);
+    let onError = () => {
+      tw_wijz_OVL_wfs.removeLoadedExtent(extent);
+      failure();
+    }
+    xhr.onerror = onError;
+    xhr.onload = function() {
+      if (xhr.status == 200) {
+        let features = tw_wijz_OVL_wfs.getFormat().readFeatures(
+              xhr.responseText, {dataProjection: 'EPSG:31370', featureProjection: projection});
+        tw_wijz_OVL_wfs.addFeatures(features);
+        success(features);
+      } else {
+        onError();
+      }
+    }
+    xhr.send();
   },
   strategy: bbox,
 });
@@ -166,15 +183,6 @@ const tw_wijz_OVL_cache = [ {
   name: "Wijzigingen Atlas Buurtwegen Oost-Vlaanderen", 
   style : tw_wijz_OVL_stl
 }]
-///popup-template Wijzigingen Oost Vlaanderen
-const tw_wijz_OVL_tmpl = feat => `
-<b>detailplanNr:${feat.detailplanNr}</b>
-<ul>
-<li>gemeentenr: ${feat.gemeentenr}</li>
-<li>ID: ${feat.IDwijziging}</li>
-<li>Datum:  ${feat.datum}</li>
-<li>Scan: <a target="_blank" href="${feat.scan}">${feat.scan}</a></li>
-</ul>`
 //#endregion
 
 //#region VLAAMSBRABANT
@@ -204,25 +212,13 @@ const tw_wijz_VLBr_cache = [ {
   name: "Wijzigingen Atlas Buurtwegen Vlaams-Brabant", 
   style : tw_wijz_VLBr_stl
 }]
-///popup-template Wijzigingen Vlaams-Brabant
-const tw_wijz_VLBr_tmpl = feat => `
-<b>ID: ${feat.DocumentID} </b> 
-<ul>
-<li>Scan: <a href="${feat.rasterbeeld}" target="_blank" >
-${feat.rasterbeeld}
-</a></li>
-<li>Omschrijving: ${feat.Omschrijving}</li> 
-<li>Datum:  ${(new Date( Date.parse(feat.DATUM))).toLocaleDateString(
-    'nl-be', { weekday:"long", year:"numeric", month:"long", day:"numeric"}) }</li>
-</ul>`
-//#endregion
 
 //#region WESTVLAANDEREN
 /// Wijzigingen_West-Vlaanderen
 ///info: https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?request=GetCapabilities&version=1.1.0&service=WFS 
 const tw_wijz_WVL_wfs = new VectorSource({
   format: new GeoJSON({
-              defaultDataProjection: 'EPSG:4326',
+              dataProjection: 'EPSG:4326',
               featureProjection: 'EPSG:3857'
           }), // GeoJSON because QGIS-server
   url: function (extent) {
@@ -253,7 +249,7 @@ const tw_wijz_WVL_cache = [ {
 ///info: https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?request=GetCapabilities&version=1.1.0&service=WFS 
 const tw_wijz_LIM_wfs_punt = new VectorSource({
   format: new GeoJSON({
-              defaultDataProjection: 'EPSG:4326',
+              dataProjection: 'EPSG:4326',
               featureProjection: 'EPSG:3857'
           }), // GeoJSON because QGIS-server
   url: function (extent) {
@@ -268,7 +264,7 @@ const tw_wijz_LIM_wfs_punt = new VectorSource({
 });
 const tw_wijz_LIM_wfs_lijn = new VectorSource({
   format: new GeoJSON({
-              defaultDataProjection: 'EPSG:4326',
+              dataProjection: 'EPSG:4326',
               featureProjection: 'EPSG:3857'
           }), // GeoJSON because QGIS-server
   url: function (extent) {
@@ -311,7 +307,7 @@ const tw_wijz_LIM_cache_2 = [ {
 ///info: https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?request=GetCapabilities&version=1.1.0&service=WFS 
 const tw_wijz_ANT_wfs = new VectorSource({
   format: new GeoJSON({
-              defaultDataProjection: 'EPSG:4326',
+              dataProjection: 'EPSG:4326',
               featureProjection: 'EPSG:3857'
           }), // GeoJSON because QGIS-server
   url: function (extent) {
@@ -340,7 +336,7 @@ const tw_wijz_ANT_cache = [ {
 //#region Perimeters_ruilverkaveling
 const Perimeters_ruilverkaveling_wfs = new VectorSource({
   format: new GeoJSON({
-              defaultDataProjection: 'EPSG:4326',
+              dataProjection: 'EPSG:4326',
               featureProjection: 'EPSG:3857'
           }), // GeoJSON because QGIS-server
   url: function (extent) {
@@ -371,21 +367,21 @@ const Perimeters_ruilverkaveling_cache = [ {
 
 // LIJST 
 const vectorsources = [ 
-  {id:"trw", source: tragewegen_wfs, name: "Trage wegen", visible: true, 
+  {id:"trw", source: tragewegen_wfs, name: "Trage wegen",  
         style: tragewegen_stl,   styleCache: tragewegen_cache, minZ: 12, template: tragewege_tmpl } ,
-  {id:"tw_wijz_VLBr", source: tw_wijz_VLBr_wfs, name: "Wijz. Vlaams-Brabant",  visible: false, 
+  {id:"tw_wijz_VLBr", source: tw_wijz_VLBr_wfs, name: "Wijz. Vlaams-Brabant",  
         style: tw_wijz_VLBr_stl, styleCache: tw_wijz_VLBr_cache, minZ: 12  } ,
-  {id:"tw_wijz_OVL",  source: tw_wijz_OVL_wfs,  name: "Wijz. Oost-Vlaanderen", visible: false, 
+  {id:"tw_wijz_OVL",  source: tw_wijz_OVL_wfs,  name: "Wijz. Oost-Vlaanderen", 
         style: tw_wijz_OVL_stl,  styleCache: tw_wijz_OVL_cache, minZ: 12  } ,
-  {id:"tw_wijz_WVL",  source: tw_wijz_WVL_wfs , name: "Wijz. West-Vlaanderen", visible: false, 
+  {id:"tw_wijz_WVL",  source: tw_wijz_WVL_wfs , name: "Wijz. West-Vlaanderen", 
         style: tw_wijz_WVL_stl,  styleCache: tw_wijz_WVL_cache, minZ: 12  } ,
-  {id:"tw_wijz_ANT",  source: tw_wijz_ANT_wfs,  name: "Wijz. Antwerpen", visible: false, 
+  {id:"tw_wijz_ANT",  source: tw_wijz_ANT_wfs,  name: "Wijz. Antwerpen", 
         style: tw_wijz_ANT_stl,  styleCache: tw_wijz_ANT_cache, minZ: 12  } ,
-  {id:"tw_wijz_LIM_ln",  source: tw_wijz_LIM_wfs_lijn,  name: "Wijz. Limburg (lijn)", visible: false, 
+  {id:"tw_wijz_LIM_ln",  source: tw_wijz_LIM_wfs_lijn,  name: "Wijz. Limburg (lijn)", 
         style: tw_wijz_LIM_stl_lijn,  styleCache: tw_wijz_LIM_cache_2, minZ: 12  } ,
-  {id:"tw_wijz_LIM_pt",  source: tw_wijz_LIM_wfs_punt,  name: "Wijz. Limburg (punt)", visible: false, 
+  {id:"tw_wijz_LIM_pt",  source: tw_wijz_LIM_wfs_punt,  name: "Wijz. Limburg (punt)", 
         style: tw_wijz_LIM_stl_pt,  styleCache: tw_wijz_LIM_cache_1, minZ: 12  } ,
-  {id:"p_ruilverkaveling",  source: Perimeters_ruilverkaveling_wfs,  name: "Ruilverkaveling", visible: false, 
+  {id:"p_ruilverkaveling",  source: Perimeters_ruilverkaveling_wfs,  name: "Ruilverkaveling", 
         style: Perimeters_ruilverkaveling_stl,  styleCache: Perimeters_ruilverkaveling_cache, minZ: 12  } ,    
   ];
 

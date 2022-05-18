@@ -29,11 +29,11 @@ class Legend extends Component {
                      map: props.map, activeTool: 'identify', 
                      vectors: vectorsources.map(o => {
                         o.lyr = addVectorLayer(props.map, o.source, o.style, o.name, o.minZ, 
-                            this.intialParams.layers.find(e => e == o.id) ? true : o.visible); 
+                            this.intialParams.layers.find(e => e == o.id) ? true : false); 
                                return o;}),
                      basemap: this.intialParams.basemap,
                      basemaps: baselayers, histomaps: histolayers
-                    };     
+                    };   
     }
   componentDidMount() {
      if(this.intialParams.center ) { viewer.setCenter( this.intialParams.center ); }
