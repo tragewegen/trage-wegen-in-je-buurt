@@ -1,6 +1,6 @@
 //import UI
 import React, { Component  } from "react";
-import { AutoComplete, Layout, Menu, Checkbox, Popover, message } from 'antd';
+import { AutoComplete, Slider, Layout, Menu, Checkbox, Popover, message } from 'antd';
 const { Sider } = Layout;
 const { SubMenu } = Menu;
 
@@ -14,7 +14,7 @@ import "./Legend.css";
 import logo from '../../images/logo.svg';
 
 // maps 
-import {background, drawLayer, viewer, geolocation} from '../Map/initMap';
+import {background, histo, drawLayer, viewer, geolocation} from '../Map/initMap';
 import {addVectorLayer, urlParams, VectorLegendSVG, lineLength, polygonArea} from '../tools'
 import {fromLonLat, toLonLat} from 'ol/proj';
 import vectorsources from '../../vectorLayers';
@@ -30,9 +30,11 @@ class Legend extends Component {
                      vectors: vectorsources.map(o => {
                         o.lyr = addVectorLayer(props.map, o.source, o.style, o.name, o.minZ, 
                             this.intialParams.layers.find(e => e == o.id) ? true : false); 
-                               return o;}),
+                        return o;}),
                      basemap: this.intialParams.basemap,
-                     basemaps: baselayers, histomaps: histolayers
+                     histomap: this.intialParams.histomap,
+                     basemaps: baselayers, 
+                     histomaps: histolayers
                     };   
     }
   componentDidMount() {
@@ -47,7 +49,7 @@ class Legend extends Component {
       let xy = toLonLat( viewer.getCenter() );
       let x = xy[0].toFixed(5); 
       let y = xy[1].toFixed(5);
-      let qry = `?logo=${logo}&x=${x}&y=${y}&z=${z}&lyrs=${lyrs}&base=${this.state.basemap}`
+      let qry = `?logo=${logo}&x=${x}&y=${y}&z=${z}&lyrs=${lyrs}&base=${this.state.basemap}&histo=${this.state.histomap}&histTrans=${histo.getOpacity()}`
       let newurl = location.protocol + "//" + location.host + location.pathname + qry;
       history.pushState({path:newurl},'',newurl);
   } );
@@ -85,18 +87,25 @@ class Legend extends Component {
       this.setState({vectors:vectors});
     }
 
-  activateBasemap = (lyrId, sublayer) => {
-      this.setState({basemap:lyrId});
-      if(sublayer == 'base'){
-        let lyr = this.state.basemaps.find( e=> (e.id == lyrId));
-        background.setSource(lyr.source);
-      }
-      else if(sublayer == 'histo'){
-        let lyr = this.state.histomaps.find( e=> (e.id == lyrId));
-        background.setSource(lyr.source);
-      }
-      
+  setVectorTrans = (idx, o) => {
+      let vectors = this.state.vectors;
+      vectors[idx].lyr.setOpacity( o );
+      this.setState({vectors:vectors});
     }
+
+
+  activateBasemap = lyrId => {
+      this.setState({basemap:lyrId});
+      let lyr = this.state.basemaps.find( e=> (e.id == lyrId));
+      background.setSource(lyr.source);
+    }
+
+  activateHistomap = lyrId => {
+      this.setState({histomap:lyrId});
+      let lyr = this.state.histomaps.find( e=> (e.id == lyrId) );
+      histo.setSource(lyr.source);
+    }
+
 
   setActiveTool = tool => {
     this.setState({activeTool: tool });
@@ -171,6 +180,14 @@ class Legend extends Component {
 
   render() {
     
+    let legendeCaption = i => <> Legende  
+                      <span style={{right:5, top: 5, position: 'absolute'}}>
+                           <Slider style={{display: 'inline-block', width: 180}}  min={-100} max={0} defaultValue={-100}
+                                   tipFormatter={val => `transparantie ${100 +val}%`}  
+                                   onAfterChange={o => this.setVectorTrans(i, o/-100)}/> 
+                      </span>
+                    </>
+
     let adresBar = <AutoComplete  style={{padding:10, width: 240 }}  
                       onChange={this.adresSearchChange} 
                       onSelect={this.adresSearchSelect}
@@ -195,6 +212,7 @@ class Legend extends Component {
                                  onClick={this.geolocation}/> 
                   </div>
     let toolNode = toolbar;
+
 
 {/* change in Popover on collapse */}
     if(this.state.menuCollapse){
@@ -230,7 +248,8 @@ class Legend extends Component {
                                     checked={this.state.vectors[i].lyr.getVisible() }>
                               {o.name}
                            </Checkbox>
-                           <Popover placement="bottomLeft" color="#8d85cfdd" title='Legende' zIndex={9999}
+                           <Popover  title={legendeCaption(i)}
+                                   zIndex={9999} placement="bottomLeft" color="#8d85cfdd"
                                    content={VectorLegendSVG(o.styleCache , 500)} >
                               <FaList  />
                            </Popover>
@@ -240,10 +259,15 @@ class Legend extends Component {
                   </SubMenu>
 
                   <SubMenu key="histomap" title="Historische kaarten" icon={<FiCalendar />} >
-                  {this.state.histomaps.map( (o,i) => {
+                    <Menu.Item  key={'transparencySlider'} disabled style={{cursor:"pointer"}} title='transparantie' >
+                    <Slider tipFormatter={val => `transparantie ${100 +val}%`} 
+                        defaultValue={ histo.getOpacity()*-100 } min={-100} max={0} step={1} 
+                        onAfterChange={o => ( histo.setOpacity( o / -100 ) || viewer.changed() )} ></Slider>
+                     </Menu.Item> 
+                  {this.state.histomaps.map( o => {
                         return ( 
-                        <Menu.Item className={ this.state.basemap == o.id  ?"ant-menu-item-selected":''}
-                          onClick={() => this.activateBasemap(o.id, 'histo')} key={o.id} >
+                        <Menu.Item className={ this.state.histomap == o.id  ?"ant-menu-item-selected":''}
+                          onClick={() => this.activateHistomap(o.id)} key={o.id} >
                             {o.name}
                         </Menu.Item> 
                         )	
@@ -251,10 +275,10 @@ class Legend extends Component {
  
                   </SubMenu>
                   <SubMenu key="background" title="Achtergrond kaarten" icon={<FaMap />} >
-                  {this.state.basemaps.map( (o,i) => {
+                  {this.state.basemaps.map( o => {
                         return ( 
                         <Menu.Item className={ this.state.basemap == o.id  ?"ant-menu-item-selected":''}
-                          onClick={() => this.activateBasemap(o.id, 'base')} key={o.id} >
+                          onClick={() => this.activateBasemap(o.id)} key={o.id} >
                             {o.name}
                         </Menu.Item> 
                         )	

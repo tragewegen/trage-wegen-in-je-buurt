@@ -4,17 +4,18 @@
   "private": true,
   "dependencies": {
     "antd": "^4.18.6",
+    "gatsby": "^2.19.30",
     "html2canvas": "^1.4.1",
     "ol": "^6.12.0",
     "proj4": "^2.8.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-icons": "^4.3.1",
-    "react-scripts": "^5.0.0"
+    "react-scripts": "^5.0.1"
   },
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "rm ./docs/* &parcel build src/index.html --public-url . --dist-dir docs"
+    "build": "parcel build src/index.html --public-url . --dist-dir docs"
   },
   "eslintConfig": {
     "extends": [

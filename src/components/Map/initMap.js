@@ -15,14 +15,21 @@ import {
 import {urlParams} from '../tools'
 
 const params = urlParams();
-let baseMap = baselayers.find(e=> (e.id === params.basemap)) || histolayers.find(e=> (e.id === params.basemap)) ;
-
+let baseMap = baselayers.find(e=> (e.id === params.basemap)) ;
+let histoMap = histolayers.find(e=> (e.id === params.histomap)) ;
  
 //initial background
 const background = new TileLayer({
     title: 'Achtergrond',
-    source: baseMap.source
+    source: baseMap ? baseMap.source : null
    });
+
+const histo = new TileLayer({
+    title: 'Historische kaart',
+    opacity:  params.histTrans,
+    source: histoMap ? histoMap.source : null
+   });
+
 
 //initial View 
 const viewer = new View({
@@ -68,7 +75,7 @@ geolocation.on('change:position',  () => {
 const initMap = () => {
     let map = new Map({
         interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
-        layers: [background, drawLayer],
+        layers: [background, histo, drawLayer],
         view: viewer
     });
     map.addControl(new ScaleLine());
@@ -76,4 +83,4 @@ const initMap = () => {
     return map;
 }
 
-export {initMap, background, viewer, drawLayer, marker, geolocation};
+export {initMap, background, histo, viewer, drawLayer, marker, geolocation};

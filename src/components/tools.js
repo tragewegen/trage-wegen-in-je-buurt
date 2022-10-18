@@ -65,6 +65,8 @@ const urlParams = () => {
     const logo = params.get("logo") ? trues.includes( params.get("logo").toLowerCase() ) : true;
     const lyrs = params.get("lyrs") ? params.get("lyrs").split(',') : ['trw'];
     const base =  params.get("base") ? params.get("base") : 'osm';
+    const histo =  params.get("histo") ? params.get("histo") : '';
+    const histTrans =  params.get("histTrans") ? parseFloat( params.get("histTrans") ): 0.5;
     let x = parseFloat( params.get("x"));
     let y = parseFloat( params.get("y"));
     let z = params.get("z") ? parseInt( params.get("z")) : 13;
@@ -73,7 +75,7 @@ const urlParams = () => {
         xy = fromLonLat([x,y]); 
     }
     z= z ? z : 8; 
-    return { center: xy, zoom: z, logo: logo, basemap: base, layers: lyrs }
+    return { center: xy, zoom: z, logo: logo, basemap: base, layers: lyrs , histomap: histo, histTrans: histTrans }
 }
 
 

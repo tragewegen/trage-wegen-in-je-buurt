@@ -156,7 +156,8 @@ const histolayers = [
   {id:"ngi1969", source: ngi1969, name: "NGI Basiskaart, 1969"},
   {id:"ngi1981", source: ngi1981, name: "NGI Basiskaart, 1981"},
   {id:"ngi1989", source: ngi1989, name: "NGI Basiskaart, 1989"},
-  {id:"ngi2000", source: ngiwms, name: "NGI Basiskaart, 2000+"}
+  {id:"ngi2000", source: ngiwms, name: "NGI Basiskaart, 2000+"},
+  {id:"", source: null, name: "Geen Historische kaart"},
  ];
 
 export {baselayers, histolayers};
