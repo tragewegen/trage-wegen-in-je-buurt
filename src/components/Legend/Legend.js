@@ -35,21 +35,37 @@ class Legend extends Component {
                      histomap: this.intialParams.histomap,
                      basemaps: baselayers, 
                      histomaps: histolayers
+<<<<<<< HEAD
                     };   
     }
+=======
+                    };                           
+    }
+
+
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
   componentDidMount() {
      if(this.intialParams.center ) { viewer.setCenter( this.intialParams.center ); }
      if(this.intialParams.zoom ) { viewer.setZoom( this.intialParams.zoom ); }
 
+<<<<<<< HEAD
      let logo= this.intialParams.logo;
 
+=======
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
      viewer.on('change', () => {
       let z = viewer.getZoom().toFixed(2);
       let lyrs = this.state.vectors.filter(e => e.lyr.getVisible()).map(e => e.id).join(',')
       let xy = toLonLat( viewer.getCenter() );
+<<<<<<< HEAD
       let x = xy[0].toFixed(5); 
       let y = xy[1].toFixed(5);
       let qry = `?logo=${logo}&x=${x}&y=${y}&z=${z}&lyrs=${lyrs}&base=${this.state.basemap}&histo=${this.state.histomap}&histTrans=${histo.getOpacity()}`
+=======
+      let x = xy[0].toFixed(6); 
+      let y = xy[1].toFixed(6);
+      let qry = this.qryString(x,y,z,lyrs);
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
       let newurl = location.protocol + "//" + location.host + location.pathname + qry;
       history.pushState({path:newurl},'',newurl);
   } );
@@ -59,6 +75,22 @@ class Legend extends Component {
     viewer.changed();
   }
 
+<<<<<<< HEAD
+=======
+ qryString = (x,y,z,lyrs) => {
+    let qry = {'logo': this.intialParams.logo, 
+               'lyrs': lyrs, 'base': this.state.basemap, 'histo': this.state.histomap, 'histTrans': histo.getOpacity(),
+                'x': x, 'y': y, 'z':z 
+               }
+    if(this.intialParams.marker){
+      let marker = toLonLat( this.intialParams.marker );
+      qry["marker_lng"] = marker[0].toFixed(6);
+      qry["marker_lat"] = marker[1].toFixed(6);
+    }
+    return '?' + new URLSearchParams(qry).toString();
+  }
+
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
   adresSearchChange = async val => {
       let geoUri = "https://loc.geopunt.be/v4/Suggestion?q=" + val;
       let resp= await fetch(geoUri).then(r => r.json());
@@ -93,7 +125,10 @@ class Legend extends Component {
       this.setState({vectors:vectors});
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
   activateBasemap = lyrId => {
       this.setState({basemap:lyrId});
       let lyr = this.state.basemaps.find( e=> (e.id == lyrId));
@@ -183,7 +218,11 @@ class Legend extends Component {
     let legendeCaption = i => <> Legende  
                       <span style={{right:5, top: 5, position: 'absolute'}}>
                            <Slider style={{display: 'inline-block', width: 180}}  min={-100} max={0} defaultValue={-100}
+<<<<<<< HEAD
                                    tipFormatter={val => `transparantie ${100 +val}%`}  
+=======
+                                   tooltip={{'formatter': val => `transparantie ${100 +val}%`}}
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
                                    onAfterChange={o => this.setVectorTrans(i, o/-100)}/> 
                       </span>
                     </>
@@ -230,15 +269,25 @@ class Legend extends Component {
                  onCollapse={c => this.setState({menuCollapse:c})}
                  style={{height:"100vh", overflowY:'auto', overflowX: 'hidden'}}
                  width={240} className="site-layout-background">
+<<<<<<< HEAD
               <div style={{paddingTop: 10, display: this.intialParams.logo ? "block" : 'none'  }} >
                   <img src={logo} id="Logo" style={{width: this.state.menuCollapse ? 40 : 100, alignSelf: 'center' }} />
               </div> 
+=======
+                <div style={{paddingTop: 10, display: this.intialParams.logo ? "block" : 'none'  }} >
+                    <img src={logo} id="Logo" style={{width: this.state.menuCollapse ? 40 : 100, alignSelf: 'center' }} />
+                </div> 
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 
               {adresNode}
               {toolNode}
 
               <Menu mode="inline"  inlineIndent={10} theme="dark"
                   defaultOpenKeys={this.state.menuCollapse ? []:['layers']} >
+<<<<<<< HEAD
+=======
+                    
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
                 <SubMenu key="layers" title="Lagen" icon={<FiLayers />} > 
                   {this.state.vectors.map( (o,i) => {
                         return (
@@ -260,9 +309,17 @@ class Legend extends Component {
 
                   <SubMenu key="histomap" title="Historische kaarten" icon={<FiCalendar />} >
                     <Menu.Item  key={'transparencySlider'} disabled style={{cursor:"pointer"}} title='transparantie' >
+<<<<<<< HEAD
                     <Slider tipFormatter={val => `transparantie ${100 +val}%`} 
                         defaultValue={ histo.getOpacity()*-100 } min={-100} max={0} step={1} 
                         onAfterChange={o => ( histo.setOpacity( o / -100 ) || viewer.changed() )} ></Slider>
+=======
+                      <Slider 
+                        tooltip={{'formatter': val => `transparantie ${100 +val}%`}}
+                        defaultValue={ histo.getOpacity()*-100 } min={-100} max={0} step={1} 
+                        onAfterChange={o => ( histo.setOpacity( o / -100 ) || viewer.changed() )} >
+                        </Slider>
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
                      </Menu.Item> 
                   {this.state.histomaps.map( o => {
                         return ( 

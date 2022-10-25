@@ -1,6 +1,11 @@
 import React, { Component  } from "react";
 import {FaCrosshairs} from "react-icons/fa";
+<<<<<<< HEAD
 import {initMap, drawLayer, marker} from './initMap';
+=======
+import {initMap, drawLayer, marker, crossHair} from './initMap';
+import TwMarker from '../../images/twMarker.svg';
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 import vectorsources from '../../vectorLayers';
 import {VectorLegendSVG} from '../tools'
 import Legend from '../Legend/Legend';
@@ -24,7 +29,12 @@ class Map extends Component {
     componentDidMount(){
        let target = document.getElementById("olmap");
        this.state.map.setTarget(target);
+<<<<<<< HEAD
        marker.setElement( document.getElementById('crosshair') )
+=======
+       crossHair.setElement( document.getElementById('crosshair') );
+       marker.setElement( document.getElementById('marker') );
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
        this.popup = new popup(this.state.map, this.infoFound);
      }
 
@@ -57,13 +67,21 @@ class Map extends Component {
         return <>
             <Modal title={this.state.popupTitle} onCancel={this.closeModal}
                    footer={<Button onClick={this.closeModal} >Sluiten</Button>} 
+<<<<<<< HEAD
                    visible={this.state.popupVisible}
+=======
+                   open={this.state.popupVisible}
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
                    bodyStyle={{height: document.body.scrollHeight /2 , overflowY:'scroll'}}
                    >
                   <div id='popContent'></div>  
             </Modal>
 
             <span id='crosshair' ><FaCrosshairs size={18} color="red"/></span>
+<<<<<<< HEAD
+=======
+            <span id='marker' ><img src={TwMarker} width="18"  /></span>
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 
             <div style={{display: this.state.printing ?'block':'none'}}>
                 <h1>Trage Wegen</h1>

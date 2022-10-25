@@ -12,7 +12,11 @@ import {
   DragRotateAndZoom,
   defaults as defaultInteractions,
 } from 'ol/interaction';
+<<<<<<< HEAD
 import {urlParams} from '../tools'
+=======
+import {urlParams} from '../tools';
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 
 const params = urlParams();
 let baseMap = baselayers.find(e=> (e.id === params.basemap)) ;
@@ -30,15 +34,24 @@ const histo = new TileLayer({
     source: histoMap ? histoMap.source : null
    });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 //initial View 
 const viewer = new View({
         center: [414243,6627955],
         zoom: 13, maxZoom: 21, minZoom: 7,
         extent: [177852,6078083,968831,6920858] 
+<<<<<<< HEAD
     });
 
  const drawLayer = new VectorLayer({
+=======
+   });
+
+const drawLayer = new VectorLayer({
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
     title: 'draw',
     source: new VectorSource(),
     style: new Style({
@@ -55,12 +68,21 @@ const viewer = new View({
             }), 
         })
       })
+<<<<<<< HEAD
   });
 
 // create an Overlay using the div with id location.
 let marker = new Overlay({
   stopEvent: false
 });
+=======
+   });
+
+// create Overlays using the div with id location (set in Map)
+let marker = new Overlay({stopEvent: false, positioning: 'bottom-center'});
+let crossHair = new Overlay({ stopEvent: false, positioning: 'center-center'});
+
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 // create a Geolocation object setup to track the position of the device
 let geolocation = new Geolocation({
         tracking: false, 
@@ -68,7 +90,11 @@ let geolocation = new Geolocation({
       });
 geolocation.on('change:position',  () => {
         const coordinates = geolocation.getPosition(); 
+<<<<<<< HEAD
         marker.setPosition(coordinates);
+=======
+        crossHair.setPosition(coordinates);
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
  });
 
 
@@ -79,8 +105,20 @@ const initMap = () => {
         view: viewer
     });
     map.addControl(new ScaleLine());
+<<<<<<< HEAD
     map.addOverlay(marker);
     return map;
 }
 
 export {initMap, background, histo, viewer, drawLayer, marker, geolocation};
+=======
+    map.addOverlay(crossHair);
+    if(params.marker){
+      map.addOverlay(marker);
+      marker.setPosition(params.marker)
+    }
+    return map;
+}
+
+export {initMap, background, histo, viewer, drawLayer, marker, crossHair, geolocation};
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904

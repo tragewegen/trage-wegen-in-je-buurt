@@ -1,5 +1,8 @@
 import {Vector as VectorLayer} from 'ol/layer';
+<<<<<<< HEAD
 
+=======
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 import {fromLonLat, transformExtent, transform, get as getProj} from 'ol/proj';
 import {register} from 'ol/proj/proj4';
 import proj4 from 'proj4';
@@ -33,23 +36,36 @@ const date_toTimeString = timeString => {
     }
 }
 
+<<<<<<< HEAD
 
 const polygonArea = geom =>  {
     geom.transform('EPSG:3857', "EPSG:31370");
+=======
+const polygonArea = geom =>  {
+    geom.transform('EPSG:3857', "EPSG:31370"); // webmercator is inacurate
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
     let area = geom.getArea().toFixed(2);
     geom.transform( "EPSG:31370", 'EPSG:3857',);
     return area;
 }
 
 const lineLength = geom =>  {
+<<<<<<< HEAD
     geom.transform('EPSG:3857', "EPSG:31370");
+=======
+    geom.transform('EPSG:3857', "EPSG:31370"); // webmercator is inacurate
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
     let area = geom.getLength().toFixed(2);
     geom.transform( "EPSG:31370", 'EPSG:3857',);s
     return area;
 }
 
+<<<<<<< HEAD
 
 const addVectorLayer = (map, dataSource, style, title, minZ=11, visible=true) => {
+=======
+const addVectorLayer = (map, dataSource, style, title='', minZ=11, visible=true) => {
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
     let vector = new VectorLayer({
         title: title, visible: visible,
         source: dataSource, minZoom: minZ,
@@ -70,12 +86,31 @@ const urlParams = () => {
     let x = parseFloat( params.get("x"));
     let y = parseFloat( params.get("y"));
     let z = params.get("z") ? parseInt( params.get("z")) : 13;
+<<<<<<< HEAD
     let xy = [414243,6627955]; 
     if( x && y ) {
         xy = fromLonLat([x,y]); 
     }
     z= z ? z : 8; 
     return { center: xy, zoom: z, logo: logo, basemap: base, layers: lyrs , histomap: histo, histTrans: histTrans }
+=======
+    let center_xy = [414243,6627955]; 
+    if( !isNaN(x) && !isNaN(y) ) {
+        center_xy = fromLonLat([x,y]); 
+    }
+
+    let marker_lng = parseFloat( params.get("marker_lng")); //x
+    let marker_lat = parseFloat( params.get("marker_lat")); //y
+    let marker_xy = null;
+    if( !isNaN(marker_lng) && !isNaN(marker_lat) ) {
+        marker_xy = fromLonLat([marker_lng,marker_lat]); 
+    }
+
+    z= z ? z : 8; 
+    return { center: center_xy, zoom: z,  marker: marker_xy,
+        logo: logo, basemap: base, layers: lyrs , 
+        histomap: histo, histTrans: histTrans }
+>>>>>>> a6d60d05481360b548d1367f2d665af1e6390904
 }
 
 
