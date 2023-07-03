@@ -81,7 +81,7 @@ let nginow = new XYZ({
 
 let abw = new WMTS({
   //info: https://tile.informatievlaanderen.be/ws/raadpleegdiensten/wmts?request=getcapabilities&service=wmts&version=1.0.0 
-    url: 'https://tile.informatievlaanderen.be/ws/raadpleegdiensten/wmts',
+    url: 'https://geo.api.vlaanderen.be/histcart/wmts',
     attributions: ["Vlaamse provincies, Geen beperkingen op de publieke toegang"],  
     crossOrigin: 'anonymous',
     layer: 'abw',
