@@ -84,7 +84,7 @@ let abw = new WMTS({
     url: 'https://geo.api.vlaanderen.be/histcart/wmts',
     attributions: ["Vlaamse provincies, Geen beperkingen op de publieke toegang"],  
     crossOrigin: 'anonymous',
-    layer: 'Atlas der Buurtwegen',
+    layer: 'abw',
     matrixSet: 'GoogleMapsVL',
     format: 'image/png',
     projection: webMercator,
