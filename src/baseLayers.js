@@ -105,7 +105,7 @@ let osm = new OSM();
 
 let lufo =  new WMTS({
   //info: https://tile.informatievlaanderen.be/ws/raadpleegdiensten/wmts?request=getcapabilities&service=wmts&version=1.0.0 
-    url: 'https://geo.api.vlaanderen.be/OFW/wmts's',
+    url: 'https://geo.api.vlaanderen.be/OFW/wmts',
     attributions: ["Informatie Vlaanderen: <a href='https://overheid.vlaanderen.be/Webdiensten-Gebruiksrecht'>gebruiksvoorwaarden</a>"], 
     crossOrigin: 'anonymous',
     layer: 'ofw',
