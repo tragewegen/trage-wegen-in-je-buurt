@@ -82,7 +82,7 @@ let nginow = new XYZ({
 let abw = new WMTS({
   //info: https://geo.api.vlaanderen.be/HISTCART/wmts?request=getcapabilities&service=wmts&version=1.0.0 
     url: 'https://geo.api.vlaanderen.be/HISTCART/wmts',
-    attributions: ["Vlaamse provincies, geen beperkingen op de publieke toegang"],  
+    attributions: ["Vlaamse provincies, Geen beperkingen op de publieke toegang"],  
     crossOrigin: 'anonymous',
     layer: 'abw',
     matrixSet: 'GoogleMapsVL',
