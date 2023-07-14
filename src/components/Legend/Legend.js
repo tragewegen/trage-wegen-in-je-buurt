@@ -83,7 +83,7 @@ class Legend extends Component {
       if( this.state.adressuggestions.length == 0 ){ return; }
       let q = this.state.adressuggestions[0].value;
       let adres = await geocode_osm(q);
-      console.log(adres)
+      message.info( {content: adres.adres, duration:10 , onClick: () => message.destroy()} );
       viewer.fit(adres.bbox);	
     }
 

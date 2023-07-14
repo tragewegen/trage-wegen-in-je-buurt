@@ -17,7 +17,7 @@ export async function geocode_osm(q){
 
     let resp = await fetch( 
         `${osm_URI}?q=${encodeURIComponent(q)}&countrycodes=be&format=json` );
-    rjs = await resp.json();
+    let rjs = await resp.json();
 
     if( rjs && rjs.length > 0){
       let loc = rjs[0];
