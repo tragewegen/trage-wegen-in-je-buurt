@@ -1,5 +1,5 @@
 //import UI
-import React, { Component  } from "react";
+import React, { Component  } from "react"; 
 import { AutoComplete, Slider, Layout, Menu, Checkbox, Popover, message } from 'antd';
 const { Sider } = Layout;
 const { SubMenu } = Menu;
@@ -15,11 +15,12 @@ import logo from '../../images/logo.svg';
 
 // maps 
 import {background, histo, drawLayer, viewer, geolocation} from '../Map/initMap';
-import {addVectorLayer, urlParams, VectorLegendSVG, lineLength, polygonArea} from '../tools'
-import {fromLonLat, toLonLat} from 'ol/proj';
+import {addVectorLayer, urlParams, VectorLegendSVG, lineLength, polygonArea} from '../tools';
+import {suggest_osm, geocode_osm} from '../geocoder';
+import {toLonLat} from 'ol/proj';
 import vectorsources from '../../vectorLayers';
 import {baselayers, histolayers} from '../../baseLayers';
-import {addMeasureLine, addMeasureArea, removeMeasure} from './DrawTool'
+import {addMeasureLine, addMeasureArea, removeMeasure} from './DrawTool';
 
 class Legend extends Component {
    constructor(props) {
@@ -73,24 +74,17 @@ class Legend extends Component {
   }
 
   adresSearchChange = async val => {
-      let geoUri = "https://loc.geopunt.be/v4/Suggestion?q=" + val;
-      let resp= await fetch(geoUri).then(r => r.json());
-      this.setState({adressuggestions: resp.SuggestionResult.map(e => ( {value: e} )) }) 
-    }
+      if (val.length <= 3) {return;}
+      let suggestions = await suggest_osm(val);
+      this.setState({adressuggestions: suggestions });
+  }
 
   adresSearchSelect = async () => {
       if( this.state.adressuggestions.length == 0 ){ return; }
       let q = this.state.adressuggestions[0].value;
-      let geoUri = "https://loc.geopunt.be/v4/Location?q=" + q;
-      let resp= await fetch(geoUri).then(r => r.json());
-      if(resp.LocationResult.length == 0){ return; }
-      let geoLoc = resp.LocationResult[0];
-      //let center  = fromLonLat([geoLoc.Location.Lon_WGS84, geoLoc.Location.Lat_WGS84]);
-      let LowerLeft = fromLonLat([geoLoc.BoundingBox.LowerLeft.Lon_WGS84, geoLoc.BoundingBox.LowerLeft.Lat_WGS84]);
-      let UpperRight = fromLonLat([geoLoc.BoundingBox.UpperRight.Lon_WGS84, geoLoc.BoundingBox.UpperRight.Lat_WGS84]);
-      let bbox = [LowerLeft[0] -50, LowerLeft[1] -50,
-                   UpperRight[0]+50, UpperRight[1] +50];
-      viewer.fit(bbox);	
+      let adres = await geocode_osm(q);
+      console.log(adres)
+      viewer.fit(adres.bbox);	
     }
 
   toggleVector = idx => {
