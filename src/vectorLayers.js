@@ -215,7 +215,7 @@ const tw_wijz_VLBr_cache = [ {
 
 //#region WESTVLAANDEREN
 /// Wijzigingen_West-Vlaanderen
-///info: https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?request=GetCapabilities&version=1.1.0&service=WFS 
+///info: https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?request=GetCapabilities&version=1.1.0&service=WFS 
 const tw_wijz_WVL_wfs = new VectorSource({
   format: new GeoJSON({
               dataProjection: 'EPSG:4326',
@@ -224,7 +224,7 @@ const tw_wijz_WVL_wfs = new VectorSource({
   url: function (extent) {
     let typeName = 'Wijzigingen_West-Vlaanderen';
     let outputFormat = "geojson";
-    let uri = "https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?" + 
+    let uri = "https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?" + 
     `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
     `bbox=${extent.join(',')},EPSG:3857`;
     return uri;
@@ -246,7 +246,7 @@ const tw_wijz_WVL_cache = [ {
 
 //#region LIMBURG
 /// Wijzigingen_Limburg
-///info: https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?request=GetCapabilities&version=1.1.0&service=WFS 
+///info: https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?request=GetCapabilities&version=1.1.0&service=WFS 
 const tw_wijz_LIM_wfs_punt = new VectorSource({
   format: new GeoJSON({
               dataProjection: 'EPSG:4326',
@@ -255,7 +255,7 @@ const tw_wijz_LIM_wfs_punt = new VectorSource({
   url: function (extent) {
     let typeName = 'Wijzigingen_Limburg_(punten)';
     let outputFormat = "geojson";
-    let uri = "https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?" + 
+    let uri = "https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?" + 
     `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
     `bbox=${extent.join(',')},EPSG:3857`;
     return uri;
@@ -270,8 +270,8 @@ const tw_wijz_LIM_wfs_lijn = new VectorSource({
   url: function (extent) {
     let typeName = 'Wijzigingen_Limburg_(lijnen)';
     let outputFormat = "geojson";
-    let uri = "https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?" + 
-    `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
+    let uri = "https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?" + 
+    `service1=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
     `bbox=${extent.join(',')},EPSG:3857`;
     return uri;
   },
@@ -304,7 +304,7 @@ const tw_wijz_LIM_cache_2 = [ {
 
 //#region ANTWERPEN
 // Wijzigingen_Antwerpen
-///info: https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?request=GetCapabilities&version=1.1.0&service=WFS 
+///info: https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?request=GetCapabilities&version=1.1.0&service=WFS 
 const tw_wijz_ANT_wfs = new VectorSource({
   format: new GeoJSON({
               dataProjection: 'EPSG:4326',
@@ -313,7 +313,7 @@ const tw_wijz_ANT_wfs = new VectorSource({
   url: function (extent) {
     let typeName = 'Wijzigingen_Antwerpen';
     let outputFormat = "geojson";
-    let uri = "https://wms.qgiscloud.com/tragewegen/trage_wegen_in_je_buurt?" + 
+    let uri = "https://wms.prod.qgiscloud.com/tragewegen/wijzigingen_online?" + 
     `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
     `bbox=${extent.join(',')},EPSG:3857`;
     return uri;
