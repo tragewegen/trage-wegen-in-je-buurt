@@ -56,8 +56,8 @@ let ngi1981 =	new XYZ({
     attributions: ["NGI: <a href='https://www.ngi.be/website/gebruiksvoorwaarden-cartoweb-be'>gebruiksvoorwaarden</a>"]
 });
 let ngi1989= new XYZ({
-  //info: https://www.ngi.be/tiles/arcgis/rest/services/seamless_carto__default__3857__1300/MapServer
-    url: "https://www.ngi.be/tiles/arcgis/rest/services/seamless_carto__default__3857__1300/MapServer/tile/{z}/{y}/{x}",
+  //info: https://wmts.ngi.be/arcgis/rest/services/seamless_carto__default__3857__1300/MapServer
+    url: "https://wmts.ngi.be/arcgis/rest/services/seamless_carto__default__3857__1300/MapServer/tile/{z}/{y}/{x}",
     minZoom: 7 , maxZoom: 17, 
     projection: webMercator,  crossOrigin: 'anonymous',
     attributions: ["NGI: <a href='https://www.ngi.be/website/gebruiksvoorwaarden-cartoweb-be'>gebruiksvoorwaarden</a>"]
