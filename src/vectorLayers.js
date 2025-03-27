@@ -29,7 +29,7 @@ const tragewegen_wfs = new VectorSource({
 function tragewegen_stl(feature, resolution) {
   let tw_jur_stat = feature.get('TW_JUR_STATUUT');
   let tw_toeg = feature.get("TW_TOEGANKELIJK");
-  let tw_zb = feature.get("TW_TOEGANKELIJK");
+  let tw_zb = feature.get("TW_ZICHTBAAR");
 
   if ((tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == -8) ||
     (tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == 1)) {
@@ -38,7 +38,8 @@ function tragewegen_stl(feature, resolution) {
   if (tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == 2) {
     return tragewegen_cache.find(e => (e.id == "greenDot")).style;
   }
-  if (tw_jur_stat == 2 && tw_toeg == 2) {
+  if ((tw_jur_stat == 2 && tw_toeg == 2) ||
+	(tw_jur_stat == 2 && tw_toeg == -8)) {
     return tragewegen_cache.find(e => (e.id == "greenDash")).style;
   }
   if ((tw_jur_stat != 2 && tw_toeg == 1 && tw_zb == -8) ||
