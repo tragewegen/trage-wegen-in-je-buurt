@@ -110,3 +110,6 @@ export function TW_BREEDTE(feat) {
     }
 }
 
+export function TW_ABW(feat) {
+    return feat.TW_ABW;
+}
