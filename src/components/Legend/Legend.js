@@ -1,15 +1,14 @@
 //import UI
 import React, { Component  } from "react"; 
-import { AutoComplete, Slider, Layout, Menu, Checkbox, Popover, message } from 'antd';
+import { AutoComplete, Slider, Layout, Menu, Checkbox, Popover, App, Divider } from 'antd';
 const { Sider } = Layout;
-const { SubMenu } = Menu;
 
 //import icons and css
 import { FiLayers } from "react-icons/fi";
 import { FaMap, FaSearch, FaList, FaTools, FaShareSquare, FaCrosshairs,
-                  FaRulerCombined, FaRuler} from "react-icons/fa";
+                FaRulerCombined, FaRuler} from "react-icons/fa";
 import {FiPrinter, FiCalendar} from "react-icons/fi";
-import 'antd/dist/antd.css';
+
 import "./Legend.css";
 import logo from '../../images/logo.svg';
 
@@ -21,11 +20,27 @@ import {toLonLat} from 'ol/proj';
 import vectorsources from '../../vectorLayers';
 import {baselayers, histolayers} from '../../baseLayers';
 import {addMeasureLine, addMeasureArea, removeMeasure} from './DrawTool';
+import _ from 'lodash'; 
+
 
 class Legend extends Component {
    constructor(props) {
       super(props);
       this.intialParams = urlParams();
+      this.messageBox  = (info, durationTime) => {
+        this.props.antdMessage.info( {
+          content: info, 
+          style: {marginTop: '20vh'}, 
+          duration: durationTime, 
+          onClick: () => {
+            this.props.antdMessage.destroy();
+            drawLayer.getSource().clear();
+          }
+            
+        });
+      };
+      
+      this.debouncedSearch = _.debounce(this.performSearch, 400);
       this.state = { menuCollapse: innerWidth < 600, adressuggestions: [],
                      map: props.map, activeTool: 'identify', 
                      vectors: vectorsources.map(o => {
@@ -38,7 +53,6 @@ class Legend extends Component {
                      histomaps: histolayers
                     };                           
     }
-
 
   componentDidMount() {
      if(this.intialParams.center ) { viewer.setCenter( this.intialParams.center ); }
@@ -60,7 +74,7 @@ class Legend extends Component {
     viewer.changed();
   }
 
- qryString = (x,y,z,lyrs) => {
+  qryString = (x,y,z,lyrs) => {
     let qry = {'logo': this.intialParams.logo, 
                'lyrs': lyrs, 'base': this.state.basemap, 'histo': this.state.histomap, 'histTrans': histo.getOpacity(),
                 'x': x, 'y': y, 'z':z 
@@ -73,17 +87,28 @@ class Legend extends Component {
     return '?' + new URLSearchParams(qry).toString();
   }
 
+  performSearch = async (val) => {
+    try {
+      const suggestions = await suggest_osm(val);
+      this.setState({ adressuggestions: suggestions });
+    } catch (error) {
+      console.error("OSM Search Error:", error);
+    }
+  };
+
   adresSearchChange = async val => {
-      if (val.length <= 3) {return;}
-      let suggestions = await suggest_osm(val);
-      this.setState({adressuggestions: suggestions });
+      if ( val && val.length <= 3) {
+        this.setState({ adressuggestions: [] });
+        return;
+      }
+      this.debouncedSearch(val);
   }
 
   adresSearchSelect = async () => {
       if( this.state.adressuggestions.length == 0 ){ return; }
       let q = this.state.adressuggestions[0].value;
       let adres = await geocode_osm(q);
-      message.info( {content: adres.adres, duration:10 , onClick: () => message.destroy()} );
+      this.messageBox(adres.adres ,10);
       viewer.fit(adres.bbox);	
     }
 
@@ -123,20 +148,14 @@ class Legend extends Component {
       this.setActiveTool('identify');
       removeMeasure(this.state.map);
       drawLayer.getSource().clear();
-      message.destroy();
+      // message.destroy();
     }
     else{ 
       this.setState({activeTool: 'meten'  }); 
       this.setActiveTool( 'meten' );
       addMeasureLine(this.state.map, feat => {
             let geom = feat.getGeometry();
-            let msgCfg = {
-              icon: <FaRuler />,
-              content: ` Gemeten afstand: ${lineLength(geom)} m`,
-              style: {marginTop: '20vh'}, 
-              onClick: () => {message.destroy(); drawLayer.getSource().clear();}
-            }
-            message.info(msgCfg, 0)
+            this.messageBox(` Gemeten afstand: ${lineLength(geom)} m` ,0);
       });
     }
   }  
@@ -146,19 +165,13 @@ class Legend extends Component {
       this.setActiveTool('identify');
       removeMeasure(this.state.map);
       drawLayer.getSource().clear();
-      message.destroy();
+      // message.destroy();
     }
     else{ 
       this.setActiveTool('area');
       addMeasureArea(this.state.map, feat => {
             let geom = feat.getGeometry();
-            let msgCfg = {
-              icon: <FaRulerCombined />,
-              content: ` Gemeten oppervlakte: ${polygonArea(geom)} m²`,
-              style: {marginTop: '20vh'}, 
-              onClick: () => {message.destroy(); drawLayer.getSource().clear();}
-            }
-            message.info(msgCfg, 0)
+            this.messageBox(` Gemeten oppervlakte: ${polygonArea(geom)} m²` , 0);
       });
     }
   }  
@@ -179,14 +192,12 @@ class Legend extends Component {
 
   share = async () => {
     await navigator.clipboard.writeText(document.location.href);
-    message.success(<>
-      De <a target='_blank' href={document.location.href} >Link</a> naar de kaart werd naar het klembord gestuurd<br/>
-     </>, 2);
+    this.messageBox(<>De <a target='_blank' href={document.location.href} >Link</a> naar de kaart werd naar het klembord gestuurd<br/> </>, 5);
   }
 
   render() {
     
-    let legendeCaption = i => <> Legende  
+    let legendeCaption = i => <>   
                       <span style={{right:5, top: 5, position: 'absolute'}}>
                            <Slider style={{display: 'inline-block', width: 180}}  min={-100} max={0} defaultValue={-100}
                                    tooltip={{'formatter': val => `transparantie ${100 +val}%`}}
@@ -194,16 +205,16 @@ class Legend extends Component {
                       </span>
                     </>
 
-    let adresBar = <AutoComplete  style={{padding:10, width: 240 }}  
+    let adresBar = <AutoComplete  style={{padding:10, width: 240, height: 60 }}  
                       onChange={this.adresSearchChange} 
                       onSelect={this.adresSearchSelect}
                       onKeyDown={e =>{ if(e.key === 'Enter') this.adresSearchSelect(); } } 
                       notFoundContent="Geen adressen gevonden"
                       options={this.state.adressuggestions} 
-                      placeholder="Zoek een Adres" />
-    let adresNode = adresBar; 
-
-    let toolbar = <div id='toolbar' >  
+                      placeholder="Zoek een Adres" 
+                      allowClear={true} />
+    let adresNode = adresBar;
+    let toolBar = <div id='toolbar' >  
                       <FiPrinter title='Printen'style={{cursor:"pointer"}} size={22}
                                  className="tool" onClick={this.props.printFunc} />
                       <FaRuler title='Afstand Meten' style={{cursor:"pointer"}} size={22}
@@ -217,17 +228,80 @@ class Legend extends Component {
                       <FaCrosshairs title='Zoom naar huidige geolocatie' className="toggle" size={22} 
                                  onClick={this.geolocation}/> 
                   </div>
-    let toolNode = toolbar;
+
+    let menuItems = [
+    {
+      key: 'layers',
+      label: 'Lagen',
+      icon: <FiLayers />,
+      children: this.state.vectors.map((o, i) => ({
+        key: o.id,
+        disabled: true,
+        style: { cursor: "pointer" },
+        label: (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Checkbox 
+              className="vectorChk"
+              onChange={() => this.toggleVector(i)} 
+              checked={this.state.vectors[i].lyr.getVisible()}
+            >
+              {o.name}
+            </Checkbox>
+            <Popover 
+              title={legendeCaption(i)}
+              zIndex={9999} 
+              placement="bottomLeft" 
+              color="#8d85cfdd"
+              content={VectorLegendSVG(o.styleCache, 500)}
+            >
+              <FaList />
+            </Popover>
+          </div>
+        ),
+      })),
+    },
+    {
+      key: 'histomap',
+      label: 'Historische kaarten',
+      icon: <FiCalendar />,
+      children: [
+        {
+          key: 'transparencySlider',
+          disabled: true,
+          style: { cursor: "pointer" },
+          label: (
+            <Slider 
+              tooltip={{ formatter: val => `transparantie ${100 + val}%` }}
+              defaultValue={histo.getOpacity() * -100} 
+              min={-100} max={0} step={1} 
+              onChangeComplete={o => (histo.setOpacity(o / -100) || viewer.changed())} 
+            />
+          ),
+        },
+        ...this.state.histomaps.map(o => ({
+          key: o.id,
+          label: o.name,
+        })),
+      ],
+    },
+    {
+      key: 'background',
+      label: 'Achtergrond kaarten',
+      icon: <FaMap />,
+      children: this.state.basemaps.map(o => ({
+        key: o.id,
+        label: o.name,
+      })),
+    }
+  ];
 
 
 {/* change in Popover on collapse */}
     if(this.state.menuCollapse){
-      adresNode = <Popover  color={'#002140'} placement="left" content={adresBar}> 
-                      <div style={{padding: '20px'}} ><FaSearch /></div> 
+      adresNode = <> <Popover  color={'#002140'} placement="left" content={adresBar}> 
+                      <div style={{paddingTop: '20px', paddingLeft: '30px' }} ><FaSearch /></div> 
                   </Popover>
-      toolNode = <Popover color={'#002140'} placement="left" content={toolNode}> 
-                    <div style={{padding: '20px'}} ><FaTools /></div> 
-                </Popover>
+                  <Divider  style={{ margin: '4px 0', borderColor: '#555' }} /> </>
 
     }
 {/* render legende */}
@@ -236,67 +310,35 @@ class Legend extends Component {
                  onCollapse={c => this.setState({menuCollapse:c})}
                  style={{height:"100vh", overflowY:'auto', overflowX: 'hidden'}}
                  width={240} className="site-layout-background">
-                <div style={{paddingTop: 10, display: this.intialParams.logo ? "block" : 'none'  }} >
-                    <img src={logo} id="Logo" style={{width: this.state.menuCollapse ? 40 : 100, alignSelf: 'center' }} />
+                <div style={{paddingTop: 10, paddingLeft: 10 , display: this.intialParams.logo ? "block" : 'none'  }} >
+                    <img src={logo} id="Logo" style={{width: this.state.menuCollapse ? 40 : 100, alignSelf: 'center'}} />
                 </div> 
 
               {adresNode}
-              {toolNode}
-
-              <Menu mode="inline"  inlineIndent={10} theme="dark"
-                  defaultOpenKeys={this.state.menuCollapse ? []:['layers']} >
-                    
-                <SubMenu key="layers" title="Lagen" icon={<FiLayers />} > 
-                  {this.state.vectors.map( (o,i) => {
-                        return (
-                        <Menu.Item key={o.id} disabled style={{cursor:"pointer"}} >
-                           <Checkbox className="vectorChk"
-                                    onChange={() => this.toggleVector(i)} 
-                                    checked={this.state.vectors[i].lyr.getVisible() }>
-                              {o.name}
-                           </Checkbox>
-                           <Popover  title={legendeCaption(i)}
-                                   zIndex={9999} placement="bottomLeft" color="#8d85cfdd"
-                                   content={VectorLegendSVG(o.styleCache , 500)} >
-                              <FaList  />
-                           </Popover>
-                        </Menu.Item>
-                        )
-                  })}
-                  </SubMenu>
-
-                  <SubMenu key="histomap" title="Historische kaarten" icon={<FiCalendar />} >
-                    <Menu.Item  key={'transparencySlider'} disabled style={{cursor:"pointer"}} title='transparantie' >
-                      <Slider 
-                        tooltip={{'formatter': val => `transparantie ${100 +val}%`}}
-                        defaultValue={ histo.getOpacity()*-100 } min={-100} max={0} step={1} 
-                        onAfterChange={o => ( histo.setOpacity( o / -100 ) || viewer.changed() )} >
-                        </Slider>
-                     </Menu.Item> 
-                  {this.state.histomaps.map( o => {
-                        return ( 
-                        <Menu.Item className={ this.state.histomap == o.id  ?"ant-menu-item-selected":''}
-                          onClick={() => this.activateHistomap(o.id)} key={o.id} >
-                            {o.name}
-                        </Menu.Item> 
-                        )	
-                  })}
- 
-                  </SubMenu>
-                  <SubMenu key="background" title="Achtergrond kaarten" icon={<FaMap />} >
-                  {this.state.basemaps.map( o => {
-                        return ( 
-                        <Menu.Item className={ this.state.basemap == o.id  ?"ant-menu-item-selected":''}
-                          onClick={() => this.activateBasemap(o.id)} key={o.id} >
-                            {o.name}
-                        </Menu.Item> 
-                        )	
-                  })}
- 
-                  </SubMenu>
-                  <Menu.Item key='padding' style={{cursor:"pointer"}} disabled />
-              </Menu>
+              {toolBar}
+          <Divider  style={{ margin: '4px 0', borderColor: '#555' }} />
+          <Menu 
+            mode="inline" 
+            inlineIndent={10} 
+            theme="dark"
+            items={menuItems} 
+            defaultOpenKeys={this.state.menuCollapse ? [] : ['layers']}
+            selectedKeys={[this.state.basemap, this.state.histomap]} 
+            onClick={(info) => {
+              if (this.state.basemaps.find(m => m.id === info.key)) {
+                this.activateBasemap(info.key);
+              } else if (this.state.histomaps.find(m => m.id === info.key)) {
+                this.activateHistomap(info.key);
+              }
+            }}
+          />
           </Sider> )
     }
 }
-export default Legend;
+export default (props) => {
+    // This hook safely grabs the message context from the <App> wrapper
+    const { message } = App.useApp(); 
+    
+    // We pass it into your class component as a prop
+    return <Legend {...props} antdMessage={message} />;
+}

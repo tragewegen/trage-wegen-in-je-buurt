@@ -45,8 +45,24 @@
 
 #toolbar {
   color: aliceblue;
+  text-align: center;
 }
 
 .ant-popover-title {
   color: white;
+}
+
+.custom-clear-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-right: 4px; /* Adjust this to move it left/right */
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.custom-clear-wrapper:hover {
+  opacity: 1; /* Darken on hover for better UX */
 }

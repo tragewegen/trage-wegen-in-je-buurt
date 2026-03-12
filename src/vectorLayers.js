@@ -137,7 +137,6 @@ const tragewegen_cache = [
   })
 }
 ]
-
 //#endregion
 
 //#region OOSTVLAANDEREN
@@ -335,6 +334,36 @@ const tw_wijz_ANT_cache = [ {
 }]
 //#endregion
 
+//#region toerismevlaanderen 
+///info: https://geodata.toerismevlaanderen.be/geoserver/wfs?REQUEST=GetCapabilities&SERVICE=WFS
+const toerismevlaanderen_wfs = new VectorSource({
+  format: new GeoJSON({
+              dataProjection: 'EPSG:4326',
+              featureProjection: 'EPSG:3857'
+          }), // GeoJSON because QGIS-server
+  url: function (extent) {
+    let typeName = 'routes:traject_wandel';
+    let outputFormat = "application/json";
+    let uri = "https://geodata.toerismevlaanderen.be/geoserver/wfs?" + 
+    `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
+    `bbox=${extent.join(',')},EPSG:3857`;
+    return uri;
+  },
+  strategy: bbox,
+});
+///styling 
+const toerismevlaanderen_stl = new Style({
+  stroke: new Stroke({
+    color: '#e26fbc', width: 3
+  })
+})
+const toerismevlaanderen_cache = [ {
+  id: 'yellowline',
+  name: "Toerisme Vlaanderen Wandel-trajecten", 
+  style : toerismevlaanderen_stl
+}]
+//#endregion
+
 //#region Perimeters_ruilverkaveling
 const Perimeters_ruilverkaveling_wfs = new VectorSource({
   format: new GeoJSON({
@@ -384,7 +413,10 @@ const vectorsources = [
   {id:"tw_wijz_LIM_pt",  source: tw_wijz_LIM_wfs_punt,  name: "Wijz. Limburg (punt)", 
         style: tw_wijz_LIM_stl_pt,  styleCache: tw_wijz_LIM_cache_1, minZ: 12  } ,
   {id:"p_ruilverkaveling",  source: Perimeters_ruilverkaveling_wfs,  name: "Ruilverkaveling", 
-        style: Perimeters_ruilverkaveling_stl,  styleCache: Perimeters_ruilverkaveling_cache, minZ: 12  } ,    
+        style: Perimeters_ruilverkaveling_stl,  styleCache: Perimeters_ruilverkaveling_cache, minZ: 12  } , 
+  {id:"toerismevlaanderen_traject_wandel",  source: toerismevlaanderen_wfs,  name: "Wandelroutes", 
+        style: toerismevlaanderen_stl,  styleCache: toerismevlaanderen_cache, minZ: 12  } , 
+                
   ];
 
 export {vectorsources};

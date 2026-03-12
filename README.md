@@ -9,7 +9,7 @@ We use nodejs/npm to install and manage dependenies: <https://nodejs.org>
 
 We use the following pakages: 	
 - React framework: <https://reactjs.org>
-- Packaging: <https://parceljs.org>
+- Packaging: <https://vite.dev/>
 - UI: <https://reach.tech>  of https://ant.design/  ??
 - Sidebar: <https://www.npmjs.com/package/react-pro-sidebar>
 - Kaart: <https://openlayers.org> 
@@ -35,7 +35,7 @@ To start the development server:
 ```
 npm run start
 ```
-The server will run on url: <>
+The server will run on url: <http://localhost:5173>
 
 
 ## Modify

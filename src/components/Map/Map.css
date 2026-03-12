@@ -1,3 +1,11 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Prevents tiny horizontal shifts */
+}
+
 .ol-zoom {
   top: 25px;
   left: auto;
@@ -26,3 +34,30 @@
   cursor: grab;
 }
 
+@media print {
+  /* 1. Force all parent wrappers to allow overflowing content */
+  html, body, #root {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* 2. Ensure your print container expands fully */
+  .print-container {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 3. Optional: Prevent elements from splitting awkwardly across two pages */
+  .print-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 4. Hide the modal and layout completely just to be safe */
+  .ant-layout, .ant-modal-root {
+    display: none !important;
+  }
+}
