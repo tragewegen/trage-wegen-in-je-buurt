@@ -8,11 +8,10 @@ Create reusable openlayers mapping application for use by Trage Wegen VZW.
 We use nodejs/npm to install and manage dependenies: <https://nodejs.org> 
 
 We use the following pakages: 	
-- React framework: <https://reactjs.org>
-- Packaging: <https://vite.dev/>
-- UI: <https://reach.tech>  of https://ant.design/  ??
-- Sidebar: <https://www.npmjs.com/package/react-pro-sidebar>
-- Kaart: <https://openlayers.org> 
+- React framework: <https://reactjs.org>  
+- Packaging: <https://vite.dev/>  
+- UI: <https://ant.design/>  
+- Kaart: <https://openlayers.org>   
 
 They are declared in the `package.json` and can be installed wit npm. 
 
@@ -61,4 +60,8 @@ git push
 ```
 
 You can put all the contents of the [docs](docs)-folder on any webserver an it should work.
+
+It will be deplyed to gitthub pages:  
+<https://tragewegen.github.io/trage-wegen-in-je-buurt/>
+
 There are no serverside dependencies for production. 
