@@ -272,7 +272,7 @@ const tw_wijz_LIM_wfs_lijn = new VectorSource({
     let typeName = 'Wijzigingen_Limburg_(lijnen)';
     let outputFormat = "geojson";
     let uri = "https://qgiscloud.com/tragewegen/wijzigingen_online/wms?" + 
-    `service1=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
+    `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
     `bbox=${extent.join(',')},EPSG:3857`;
     return uri;
   },
