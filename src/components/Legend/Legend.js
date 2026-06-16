@@ -310,9 +310,9 @@ class Legend extends Component {
                  onCollapse={c => this.setState({menuCollapse:c})}
                  style={{height:"100vh", overflowY:'auto', overflowX: 'hidden'}}
                  width={240} className="site-layout-background">
-                <div style={{paddingTop: 10, paddingLeft: 10 , display: this.intialParams.logo ? "block" : 'none'  }} >
-                    <img src={logo} id="Logo" style={{width: this.state.menuCollapse ? 40 : 100, alignSelf: 'center'}} />
-                </div> 
+                <div style={{ paddingTop: 15, display: this.intialParams.logo ? "flex" : 'none', justifyContent: 'center', width: '100%' }} >
+					<img src={logo} id="Logo" style={{ width: this.state.menuCollapse ? 40 : 120 }} />
+				</div> 
 
               {adresNode}
               {toolBar}
