@@ -61,3 +61,14 @@ html, body {
     display: none !important;
   }
 }
+
+/* <-- TOEGEVOEGD: Grayscale styling voor OpenStreetMap --> */
+.osm-active .ol-background-layer {
+  filter: grayscale(100%);
+}
+
+/* Optioneel: Maakt de grijze kaart nét een tikkeltje lichter/zachter 
+   zodat jullie gele trage wegen er nóg feller bovenuit springen */
+.osm-active .ol-background-layer img {
+  opacity: 0.9;
+}

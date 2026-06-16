@@ -18,9 +18,10 @@ const params = urlParams();
 let baseMap = baselayers.find(e=> (e.id === params.basemap)) ;
 let histoMap = histolayers.find(e=> (e.id === params.histomap)) ;
  
-//initial background
+// initial background - nu voorzien van een vaste CSS-klasse
 const background = new TileLayer({
     title: 'Achtergrond',
+    className: 'ol-background-layer', // <-- TOEGEVOEGD: hiermee kunnen we deze laag in CSS targeten
     source: baseMap ? baseMap.source : null
    });
 
@@ -77,6 +78,28 @@ const initMap = () => {
         layers: [background, histo, drawLayer],
         view: viewer
     });
+
+    // <-- TOEGEVOEGD: Logica om te controleren of OpenStreetMap actief is -->
+    const checkOsmActive = () => {
+        const target = map.getTargetElement();
+        if (!target) return; // Wacht tot de kaart aan de HTML gekoppeld is
+        
+        const currentSource = background.getSource();
+        const currentBase = baselayers.find(e => e.source === currentSource);
+        
+        // Als de actieve kaart de ID 'osm' heeft, voeg de klasse toe, anders verwijder hem
+        if (currentBase && currentBase.id === 'osm') {
+            target.classList.add('osm-active');
+        } else {
+            target.classList.remove('osm-active');
+        }
+    };
+
+    // Activeer de controle bij het wisselen van kaartbron én zodra de kaart aan de HTML (target) gekoppeld wordt
+    background.on('change:source', checkOsmActive);
+    map.on('change:target', checkOsmActive);
+    // <-- EINDE LOGICA -->
+
     map.addControl(new ScaleLine());
     map.addOverlay(crossHair);
     if(params.marker){
