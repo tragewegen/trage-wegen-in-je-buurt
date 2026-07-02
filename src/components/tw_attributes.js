@@ -15,7 +15,14 @@ export function TW_JUR_STATUUT(feat) {
 }
   
 export function TW_DAT_INVENTARISATIE(feat) {
-    return date_toTimeString(feat.TW_DAT_INVENTARISATIE);
+    const rawDate = feat.TW_DAT_INVENTARISATIE;
+    
+    // Controleer of de datum leeg is, of begint met de 1970-placeholder
+    if (!rawDate || String(rawDate).startsWith('1970-01-01')) {
+        return "undefined";
+    }
+    
+    return date_toTimeString(rawDate);
 }
   
 export function TW_TOEGANKELIJK(feat) {
