@@ -3,7 +3,7 @@ import {bbox} from 'ol/loadingstrategy';
 import VectorSource from 'ol/source/Vector';
 import GML3 from 'ol/format/GML3';
 import GeoJSON from 'ol/format/GeoJSON';
-import {Stroke, Icon, Fill, Style} from 'ol/style';
+import {Stroke, Icon, Fill, Style, Circle, Text} from 'ol/style';
 import greenRoad from './images/greenRoad_lim.svg'
 import {TW_BREEDTE, TW_DAT_INVENTARISATIE, TW_JUR_STATUUT,  TW_NIET_TG_REDEN, 
   TW_NIET_ZB_REDEN, TW_TOEGANKELIJK, TW_VERHARDING, TW_ZICHTBAAR, TW_ABW} from './components/tw_attributes';
@@ -336,32 +336,86 @@ const tw_wijz_ANT_cache = [ {
 
 //#region toerismevlaanderen 
 ///info: https://geodata.toerismevlaanderen.be/geoserver/wfs?REQUEST=GetCapabilities&SERVICE=WFS
+const toerismevlaanderen_format = new GeoJSON({
+  dataProjection: 'EPSG:4326',
+  featureProjection: 'EPSG:3857'
+});
+
 const toerismevlaanderen_wfs = new VectorSource({
-  format: new GeoJSON({
-              dataProjection: 'EPSG:4326',
-              featureProjection: 'EPSG:3857'
-          }), // GeoJSON because QGIS-server
-  url: function (extent) {
-    let typeName = 'routes:traject_wandel';
-    let outputFormat = "application/json";
-    let uri = "https://geodata.toerismevlaanderen.be/geoserver/wfs?" + 
-    `service=WFS&version=1.1.0&request=GetFeature&typeName=${typeName}&outputFormat=${outputFormat}&srsName=EPSG:4326&`+
-    `bbox=${extent.join(',')},EPSG:3857`;
-    return uri;
+  format: toerismevlaanderen_format,
+  loader: function (extent, resolution, projection, success, failure) {
+    let baseUrl = "https://geodata.toerismevlaanderen.be/geoserver/wfs?service=WFS&version=1.1.0&request=GetFeature&outputFormat=application/json&srsName=EPSG:4326&" +
+                  `bbox=${extent.join(',')},EPSG:3857`;
+    
+    let urlTraject = `${baseUrl}&typeName=routes:traject_wandel`;
+    let urlKnoop = `${baseUrl}&typeName=routes:knoop_wandel`;
+
+    // Haal beide lagen apart op zodat GeoServer niet overstuur raakt
+    Promise.all([
+      fetch(urlTraject).then(res => { if(!res.ok) throw new Error(); return res.json(); }),
+      fetch(urlKnoop).then(res => { if(!res.ok) throw new Error(); return res.json(); })
+    ]).then(([dataTraject, dataKnoop]) => {
+      const featuresTraject = toerismevlaanderen_format.readFeatures(dataTraject, { featureProjection: projection });
+      const featuresKnoop = toerismevlaanderen_format.readFeatures(dataKnoop, { featureProjection: projection });
+      
+      toerismevlaanderen_wfs.addFeatures(featuresTraject);
+      toerismevlaanderen_wfs.addFeatures(featuresKnoop);
+      
+      success([...featuresTraject, ...featuresKnoop]);
+    }).catch(err => {
+      console.error("Fout bij het ophalen van Toerisme Vlaanderen data:", err);
+      toerismevlaanderen_wfs.removeLoadedExtent(extent);
+      failure();
+    });
   },
   strategy: bbox,
 });
-///styling 
-const toerismevlaanderen_stl = new Style({
+
+const toerismevlaanderen_traject_stl = new Style({
   stroke: new Stroke({
-    color: '#e26fbc', width: 3
+    // rgba(R, G, B, A) -> De '0.5' aan het einde zorgt voor 50% doorschijnendheid
+    color: 'rgba(226, 111, 188, 0.5)', 
+    width: 10
   })
-})
-const toerismevlaanderen_cache = [ {
-  id: 'yellowline',
-  name: "Toerisme Vlaanderen Wandel-trajecten", 
-  style : toerismevlaanderen_stl
-}]
+});
+
+function toerismevlaanderen_stl(feature, resolution) {
+  if (!feature) return null;
+  const geometry = feature.getGeometry();
+  if (!geometry) return null;
+  
+  const geomType = geometry.getType();
+  
+  if (geomType === 'Point' || geomType === 'MultiPoint') {
+    // Hier is 'knoopnr' nu als eerste prioriteit ingesteld!
+    const knoopNummer = feature.get('knoopnr') || feature.get('knoop_nr') || feature.get('knooppunt') || feature.get('nummer') || feature.get('label') || '';
+    
+    return new Style({
+      image: new Circle({
+        radius: 10,
+        fill: new Fill({ color: '#e26fbc' }),
+        stroke: new Stroke({ color: '#ffffff', width: 2 })
+      }),
+      text: new Text({
+        font: 'bold 11px Arial, sans-serif',
+        fill: new Fill({ color: '#ffffff' }),
+        textAlign: 'center',
+        textBaseline: 'middle',
+        text: String(knoopNummer)
+      })
+    });
+  }
+  
+  return toerismevlaanderen_traject_stl;
+}
+
+const toerismevlaanderen_cache = [ 
+  {
+    id: 'yellowline',
+    name: "Toerisme Vlaanderen Wandel-trajecten", 
+    style : toerismevlaanderen_traject_stl
+  }
+];
 //#endregion
 
 //#region Perimeters_ruilverkaveling
@@ -414,7 +468,7 @@ const vectorsources = [
         style: tw_wijz_LIM_stl_pt,  styleCache: tw_wijz_LIM_cache_1, minZ: 12  } ,
   {id:"p_ruilverkaveling",  source: Perimeters_ruilverkaveling_wfs,  name: "Ruilverkaveling", 
         style: Perimeters_ruilverkaveling_stl,  styleCache: Perimeters_ruilverkaveling_cache, minZ: 12  } , 
-  {id:"toerismevlaanderen_traject_wandel",  source: toerismevlaanderen_wfs,  name: "Wandelroutes", 
+  {id:"toerismevlaanderen_traject_wandel",  source: toerismevlaanderen_wfs,  name: "Wandelknooppunten", 
         style: toerismevlaanderen_stl,  styleCache: toerismevlaanderen_cache, minZ: 12  } , 
                 
   ];
