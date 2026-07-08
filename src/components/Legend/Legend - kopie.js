@@ -12,10 +12,9 @@ import {FiPrinter, FiCalendar} from "react-icons/fi";
 import "./Legend.css";
 import logo from '../../images/logo.svg';
 
-// 'tools' laadt eerst voor de juiste Proj4 Lambert-registratie
-import {addVectorLayer, urlParams, VectorLegendSVG, lineLength, polygonArea} from '../tools';
+// maps 
 import {background, histo, drawLayer, viewer, geolocation} from '../Map/initMap';
-
+import {addVectorLayer, urlParams, VectorLegendSVG, lineLength, polygonArea} from '../tools';
 import {suggest_osm, geocode_osm} from '../geocoder';
 import {toLonLat} from 'ol/proj';
 import vectorsources from '../../vectorLayers';
@@ -44,7 +43,6 @@ class Legend extends Component {
       this.debouncedSearch = _.debounce(this.performSearch, 400);
       this.state = { menuCollapse: innerWidth < 600, adressuggestions: [],
                      map: props.map, activeTool: 'identify', 
-                     isSharingMode: false, 
                      vectors: vectorsources.map(o => {
                         o.lyr = addVectorLayer(props.map, o.source, o.style, o.name, o.minZ, 
                             this.intialParams.layers.find(e => e == o.id) ? true : false); 
@@ -150,6 +148,7 @@ class Legend extends Component {
       this.setActiveTool('identify');
       removeMeasure(this.state.map);
       drawLayer.getSource().clear();
+      // message.destroy();
     }
     else{ 
       this.setState({activeTool: 'meten'  }); 
@@ -166,9 +165,10 @@ class Legend extends Component {
       this.setActiveTool('identify');
       removeMeasure(this.state.map);
       drawLayer.getSource().clear();
+      // message.destroy();
     }
     else{ 
-      this.setState({activeTool: 'area'});
+      this.setActiveTool('area');
       addMeasureArea(this.state.map, feat => {
             let geom = feat.getGeometry();
             this.messageBox(` Gemeten oppervlakte: ${polygonArea(geom)} m²` , 0);
@@ -190,68 +190,9 @@ class Legend extends Component {
         }
   } 
 
-  handleMapClick = async (evt) => {
-    const { map } = this.state;
-    if (!map) return;
-
-    map.un('singleclick', this.handleMapClick);
-
-    const coordinate = evt.coordinate;
-    const xy = toLonLat(coordinate);
-    const x = xy[0].toFixed(6);
-    const y = xy[1].toFixed(6);
-    const z = viewer.getZoom().toFixed(2);
-    let lyrs = this.state.vectors.filter(e => e.lyr.getVisible()).map(e => e.id).join(',');
-
-    let qry = {
-      'logo': this.intialParams.logo,
-      'lyrs': lyrs,
-      'base': this.state.basemap,
-      'histo': this.state.histomap,
-      'histTrans': histo.getOpacity(),
-      'x': x,
-      'y': y,
-      'z': z,
-      'marker_lng': x,
-      'marker_lat': y
-    };
-
-    let qryString = '?' + new URLSearchParams(qry).toString();
-    let shareUrl = location.protocol + "//" + location.host + location.pathname + qryString;
-
-    await navigator.clipboard.writeText(shareUrl);
-    
-    this.messageBox(<>De <a target='_blank' href={shareUrl} >Link (inclusief marker)</a> naar exact deze locatie is gekopieerd naar het klembord!<br/> </>, 6);
-
-    this.setState({ isSharingMode: false });
-    this.setActiveTool('identify'); 
-    
-    const mapEl = map.getTargetElement();
-    if (mapEl) mapEl.style.cursor = '';
-  }
-
-  share = () => {
-    const { map } = this.state;
-    if (!map) return;
-
-    if (!this.state.isSharingMode) {
-      this.setState({ isSharingMode: true });
-      this.setActiveTool('sharing'); 
-      
-      const mapEl = map.getTargetElement();
-      if (mapEl) mapEl.style.cursor = 'crosshair';
-
-      this.messageBox("Deelmodus actief. Klik ergens op de kaart om die exacte plek te delen met een marker.", 8);
-      map.on('singleclick', this.handleMapClick);
-    } else {
-      this.setState({ isSharingMode: false });
-      this.setActiveTool('identify'); 
-      
-      const mapEl = map.getTargetElement();
-      if (mapEl) mapEl.style.cursor = '';
-      map.un('singleclick', this.handleMapClick);
-      this.props.antdMessage.destroy();
-    }
+  share = async () => {
+    await navigator.clipboard.writeText(document.location.href);
+    this.messageBox(<>De <a target='_blank' href={document.location.href} >Link</a> naar de kaart werd naar het klembord gestuurd<br/> </>, 5);
   }
 
   render() {
@@ -273,45 +214,20 @@ class Legend extends Component {
                       placeholder="Zoek een Adres" 
                       allowClear={true} />
     let adresNode = adresBar;
-    
-    let toolBar = (
-      <div id="toolbar">  
-        <FiPrinter 
-          title="Printen" 
-          style={{ cursor: "pointer" }} 
-          size={22}
-          className="tool" 
-          onClick={this.props.printFunc} 
-        />
-        <FaRuler 
-          title="Afstand Meten" 
-          style={{ cursor: "pointer" }} 
-          size={22}
-          className={this.state.activeTool === "meten" ? "toggle activeTool" : "toggle"} 
-          onClick={this.measureLine} 
-        />
-        <FaRulerCombined 
-          title="Oppervlakte Meten" 
-          style={{ cursor: "pointer" }} 
-          size={22}
-          className={this.state.activeTool === "area" ? "toggle activeTool" : "toggle"} 
-          onClick={this.measureArea} 
-        />
-        <FaShareSquare 
-          title={this.state.isSharingMode ? "Annuleer delen" : "Kaart delen"} 
-          className={this.state.isSharingMode ? "toggle activeTool" : "toggle"} 
-          size={22}
-          style={{ color: this.state.isSharingMode ? "#52c41a" : "inherit", cursor: "pointer" }}
-          onClick={this.share}
-        /> 
-        <FaCrosshairs 
-          title="Zoom naar huidige geolocatie" 
-          className="toggle" 
-          size={22} 
-          onClick={this.geolocation}
-        /> 
-      </div>
-    );
+    let toolBar = <div id='toolbar' >  
+                      <FiPrinter title='Printen'style={{cursor:"pointer"}} size={22}
+                                 className="tool" onClick={this.props.printFunc} />
+                      <FaRuler title='Afstand Meten' style={{cursor:"pointer"}} size={22}
+                                 className={this.state.activeTool == 'meten'? 'toggle activeTool': 'toggle'} 
+                                 onClick={this.measureLine} />
+                      <FaRulerCombined title='Oppervlakte Meten' style={{cursor:"pointer"}} size={22}
+                                 className={this.state.activeTool == 'area'? 'toggle activeTool': 'toggle'} 
+                                 onClick={this.measureArea} />
+                      <FaShareSquare title='Kaart delen' className="toggle" size={22}
+                                 onClick={this.share}/> 
+                      <FaCrosshairs title='Zoom naar huidige geolocatie' className="toggle" size={22} 
+                                 onClick={this.geolocation}/> 
+                  </div>
 
     let menuItems = [
     {
@@ -379,13 +295,16 @@ class Legend extends Component {
     }
   ];
 
+
+{/* change in Popover on collapse */}
     if(this.state.menuCollapse){
       adresNode = <> <Popover  color={'#002140'} placement="left" content={adresBar}> 
                       <div style={{paddingTop: '20px', paddingLeft: '30px' }} ><FaSearch /></div> 
                   </Popover>
                   <Divider  style={{ margin: '4px 0', borderColor: '#555' }} /> </>
-    }
 
+    }
+{/* render legende */}
     return (
           <Sider collapsible collapsed={this.state.menuCollapse} theme="dark"
                  onCollapse={c => this.setState({menuCollapse:c})}
@@ -416,8 +335,10 @@ class Legend extends Component {
           </Sider> )
     }
 }
-
 export default (props) => {
+    // This hook safely grabs the message context from the <App> wrapper
     const { message } = App.useApp(); 
+    
+    // We pass it into your class component as a prop
     return <Legend {...props} antdMessage={message} />;
-};
+}
