@@ -30,6 +30,7 @@ export function TW_TOEGANKELIJK(feat) {
         case -8: return "Ongekend";
         case 1: return "Toegankelijk";
         case 2: return "Niet-toegankelijk";
+		case -8: return "Niet-toegankelijk";
         default: return '<i>null</i>';
     }
 }

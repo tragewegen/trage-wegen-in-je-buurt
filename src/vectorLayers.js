@@ -49,7 +49,8 @@ function tragewegen_stl(feature, resolution) {
   if (tw_jur_stat != 2 && tw_toeg == 1 && tw_zb == 2) {
     return tragewegen_cache.find(e => (e.id == "blueDot")).style;
   }
-  if (tw_jur_stat != 2 && tw_toeg == 2) {
+  if ((tw_jur_stat != 2 && tw_toeg == 2) ||
+	(tw_jur_stat != 2 && tw_toeg == -8)) {
     return tragewegen_cache.find(e => (e.id == "blueDash")).style;
   }
 }
