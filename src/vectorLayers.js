@@ -30,9 +30,11 @@ function tragewegen_stl(feature, resolution) {
   let tw_jur_stat = feature.get('TW_JUR_STATUUT');
   let tw_toeg = feature.get("TW_TOEGANKELIJK");
   let tw_zb = feature.get("TW_ZICHTBAAR");
+  let lblstatus = feature.get("LBLSTATUS");
 
   if ((tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == -8) ||
-    (tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == 1)) {
+    (tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == 1) ||
+	(tw_jur_stat == 2 && lblstatus == 'in gebruik')){
     return tragewegen_cache.find(e => (e.id == "greenline")).style;
   }
   if (tw_jur_stat == 2 && tw_toeg == 1 && tw_zb == 2) {
@@ -43,7 +45,8 @@ function tragewegen_stl(feature, resolution) {
     return tragewegen_cache.find(e => (e.id == "greenDash")).style;
   }
   if ((tw_jur_stat != 2 && tw_toeg == 1 && tw_zb == -8) ||
-    (tw_jur_stat != 2 && tw_toeg == 1 && tw_zb == 1)) {
+    (tw_jur_stat != 2 && tw_toeg == 1 && tw_zb == 1) ||
+	(tw_jur_stat != 2 && lblstatus == 'in gebruik')) {
     return tragewegen_cache.find(e => (e.id == "blueline")).style;
   }
   if (tw_jur_stat != 2 && tw_toeg == 1 && tw_zb == 2) {
@@ -63,7 +66,7 @@ const tragewege_tmpl = feat => `
 <li><b>Juridisch statuut</b>: ${TW_JUR_STATUUT(feat)}</li>
 <li><b>Nr Atlas Buurtwegen</b>: ${TW_ABW(feat)}</li>
 <li><b>Datum inventarisatie</b>: ${TW_DAT_INVENTARISATIE(feat)}</li>
-<li><b>Toegankelijkheid</b>: ${TW_TOEGANKELIJK(feat)}</li>
+<li><b>Toegankelijkheid</b>: ${LBLSTATUS(feat)}</li>
 <li><b>Reden niet toegankelijk</b>: ${TW_NIET_TG_REDEN(feat)}</li>
 <li><b>Zichtbaarheid</b>: ${TW_ZICHTBAAR(feat)}</li>
 <li><b>Reden niet zichtbaar</b>: ${TW_NIET_ZB_REDEN(feat)}</li>
