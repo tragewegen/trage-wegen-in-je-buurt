@@ -6,7 +6,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import {Stroke, Icon, Fill, Style, Circle, Text} from 'ol/style';
 import greenRoad from './images/greenRoad_lim.svg'
 import {TW_BREEDTE, TW_DAT_INVENTARISATIE, TW_JUR_STATUUT,  TW_NIET_TG_REDEN, 
-  TW_NIET_ZB_REDEN, TW_TOEGANKELIJK, TW_VERHARDING, TW_ZICHTBAAR, TW_ABW} from './components/tw_attributes';
+  TW_NIET_ZB_REDEN, TW_TOEGANKELIJK, TW_VERHARDING, TW_ZICHTBAAR, TW_ABW, LBLSTATUS} from './components/tw_attributes';
 import {transformExtent_tolb72} from './components/tools';
 
 //#region TRAGE_WEGEN
@@ -66,7 +66,8 @@ const tragewege_tmpl = feat => `
 <li><b>Juridisch statuut</b>: ${TW_JUR_STATUUT(feat)}</li>
 <li><b>Nr Atlas Buurtwegen</b>: ${TW_ABW(feat)}</li>
 <li><b>Datum inventarisatie</b>: ${TW_DAT_INVENTARISATIE(feat)}</li>
-<li><b>Toegankelijkheid</b>: ${LBLSTATUS(feat)}</li>
+<li><b>Status</b>: ${LBLSTATUS(feat)}</li>
+<li><b>Toegankelijkheid</b>: ${TW_TOEGANKELIJK(feat)}</li>
 <li><b>Reden niet toegankelijk</b>: ${TW_NIET_TG_REDEN(feat)}</li>
 <li><b>Zichtbaarheid</b>: ${TW_ZICHTBAAR(feat)}</li>
 <li><b>Reden niet zichtbaar</b>: ${TW_NIET_ZB_REDEN(feat)}</li>
